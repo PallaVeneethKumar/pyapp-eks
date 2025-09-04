@@ -21,9 +21,9 @@ pipeline{
                      git config user.name "Jenkins Server"
                      git config user.email "jenkins@automation.com"
                      yq e '.spec.template.spec.containers[0].image = "veneethkumar/pyappeks:${env.BUILD_NUMBER}"' -i ./k8s/pyapp-deployment.yml
-                     git add .
-                     git commit -m 'Docker tag updated by jenkins'
-                     git push origin main
+                     // git add .
+                     // git commit -m 'Docker tag updated by jenkins'
+                     // git push origin main
                  """
                 }
             }

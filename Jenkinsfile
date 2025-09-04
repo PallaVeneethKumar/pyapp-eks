@@ -17,14 +17,18 @@ pipeline{
         stage("Update Tag in Deployment YAML and push"){
             steps{
                 withCredentials([gitUsernamePassword(credentialsId: 'git-pwd', gitToolName: 'Default')]) {
-                    sh """
-                     git config user.name "Jenkins Server"
-                     git config user.email "jenkins@automation.com"
-                     yq e '.spec.template.spec.containers[0].image = "veneethkumar/pyappeks:${env.BUILD_NUMBER}"' -i ./k8s/pyapp-deployment.yml
-                     // git add .
-                     // git commit -m 'Docker tag updated by jenkins'
-                     // git push origin main
-                 """
+                    sh '''
+    git config user.name "Jenkins Server"
+    git config user.email "jenkins@automation.com"
+    yq e '.spec.template.spec.containers[0].image = "veneethkumar/pyappeks:${BUILD_NUMBER}"' -i ./k8s/pyapp-deployment.yml
+
+    # Add the updated YAML file to git
+    git add ./k8s/pyapp-deployment.yml
+
+    git commit -m "Updated image tag to ${BUILD_NUMBER}"
+    git push origin main
+'''
+
                 }
             }
         }

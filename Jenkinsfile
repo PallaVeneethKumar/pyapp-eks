@@ -3,14 +3,14 @@ pipeline{
     stages{
         stage("Docker Image"){
             steps{
-                sh "docker build -t kammana/pyappeks:${env.BUILD_NUMBER} ."
+                sh "docker build -t veneethkumar/pyappeks:${env.BUILD_NUMBER} ."
             }
         }
         stage("Pust To Docker Hub"){
             steps{
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'pwd', usernameVariable: 'usr')]) {
                     sh "docker login -u ${usr} -p ${pwd}"
-                    sh "docker push kammana/pyappeks:${env.BUILD_NUMBER}"
+                    sh "docker push veneethkumar/pyappeks:${env.BUILD_NUMBER}"
                 }
             }
         }
@@ -20,7 +20,7 @@ pipeline{
                     sh """
                      git config user.name "Jenkins Server"
                      git config user.email "jenkins@automation.com"
-                     yq e '.spec.template.spec.containers[0].image = "kammana/pyappeks:${env.BUILD_NUMBER}"' -i ./k8s/pyapp-deployment.yml
+                     yq e '.spec.template.spec.containers[0].image = "veneethkumar/pyappeks:${env.BUILD_NUMBER}"' -i ./k8s/pyapp-deployment.yml
                      git add .
                      git commit -m 'Docker tag updated by jenkins'
                      git push origin main

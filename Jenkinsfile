@@ -1,34 +1,52 @@
-pipeline{
+pipeline {
     agent any
-    stages{
-        stage("Docker Image"){
-            steps{
-                sh "docker build -t veneethkumar/pyappeks:${env.BUILD_NUMBER} ."
+
+    environment {
+        IMAGE_NAME = "veneethkumar/pyappeks:${BUILD_NUMBER}"
+    }
+
+    stages {
+        stage("Docker Image") {
+            steps {
+                echo "🔨 Building Docker image: ${IMAGE_NAME}"
+                sh "docker build -t ${IMAGE_NAME} ."
             }
         }
-        stage("Pust To Docker Hub"){
-            steps{
+
+        stage("Push to Docker Hub") {
+            steps {
                 withCredentials([usernamePassword(credentialsId: 'docker-pwd', passwordVariable: 'pwd', usernameVariable: 'usr')]) {
-                    sh "docker login -u ${usr} -p ${pwd}"
-                    sh "docker push veneethkumar/pyappeks:${env.BUILD_NUMBER}"
+                    echo "🚀 Logging in to Docker Hub"
+                    sh "echo ${pwd} | docker login -u ${usr} --password-stdin"
+                    echo "📦 Pushing Docker image: ${IMAGE_NAME}"
+                    sh "docker push ${IMAGE_NAME}"
                 }
             }
         }
-        stage("Update Tag in Deployment YAML and push"){
-            steps{
+
+        stage("Update Tag in Deployment YAML and Push to Git") {
+            steps {
                 withCredentials([gitUsernamePassword(credentialsId: 'git-pwd', gitToolName: 'Default')]) {
                     sh '''
-    git config user.name "Jenkins Server"
-    git config user.email "jenkins@automation.com"
-    yq e '.spec.template.spec.containers[0].image = "veneethkumar/pyappeks:${BUILD_NUMBER}"' -i ./k8s/pyapp-deployment.yml
+                        echo "🔁 Checking out main branch"
+                        git checkout main
 
-    # Add the updated YAML file to git
-    git add ./k8s/pyapp-deployment.yml
+                        echo "📝 Configuring Git user"
+                        git config user.name "Jenkins Server"
+                        git config user.email "jenkins@automation.com"
 
-    git commit -m "Updated image tag to ${BUILD_NUMBER}"
-    git push origin main
-'''
+                        echo "🛠️ Updating Kubernetes YAML with new image tag"
+                        yq e '.spec.template.spec.containers[0].image = "veneethkumar/pyappeks:'"$BUILD_NUMBER"'"' -i ./k8s/pyapp-deployment.yml
 
+                        echo "📂 Adding updated YAML to Git"
+                        git add ./k8s/pyapp-deployment.yml
+
+                        echo "✅ Committing change"
+                        git commit -m "Updated image tag to $BUILD_NUMBER" || echo "Nothing to commit"
+
+                        echo "📤 Pushing to main branch"
+                        git push origin main
+                    '''
                 }
             }
         }

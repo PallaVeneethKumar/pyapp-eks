@@ -16,7 +16,7 @@ pipeline{
         }
         stage("Update Tag in Deployment YAML and push"){
             steps{
-                withCredentials([gitUsernamePassword(credentialsId: 'github-creds', gitToolName: 'Default')]) {
+                withCredentials([gitUsernamePassword(credentialsId: 'git-pwd', gitToolName: 'Default')]) {
                     sh """
                      git config user.name "Jenkins Server"
                      git config user.email "jenkins@automation.com"

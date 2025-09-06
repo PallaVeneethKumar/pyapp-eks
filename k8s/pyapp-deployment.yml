@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: pyapp
-          image: veneethkumar/pyappeks:44
+          image: veneethkumar/pyappeks:45
           ports:
             - containerPort: 8000

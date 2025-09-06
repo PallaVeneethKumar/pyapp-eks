@@ -12,7 +12,7 @@ def create_app():
         <html>
             <head><title>Python Docker App</title></head>
             <body style="font-family: Arial, sans-serif; text-align: center; margin-top: 50px;">
-                <h1 style="color: yellow;">{message}</h1>
+                <h1 style="color: green;">{message}</h1>
             </body>
         </html>
         """
